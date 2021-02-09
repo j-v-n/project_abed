@@ -5,6 +5,7 @@ import pickle
 import os
 import logging
 from tqdm import tqdm
+import string
 
 DATA_DIR = "./data/"
 UNKNOWN_TOKEN = "#UNK"
@@ -12,8 +13,8 @@ BEGIN_TOKEN = "#BEG"
 END_TOKEN = "#END"
 # names = ["test", "train"]
 
-MAX_TOKENS = 30
-MIN_TOKEN_FREQ = 10
+MAX_TOKENS = 10
+MIN_TOKEN_FREQ = 20
 SHUFFLE_SEED = 5871
 
 EMB_DICT_NAME = "emb_dict.dat"
@@ -193,3 +194,25 @@ def encode_phrase_pairs(phrase_pairs, emb_dict, filter_unknows=True):
             continue
         result.append(p)
     return result
+
+
+def untokenize(words):
+    return "".join(
+        [
+            " " + i if not i.startswith("'") and i not in string.punctuation else i
+            for i in words
+        ]
+    ).strip()
+
+
+def group_train_data(training_data):
+    """
+    Group training pairs by first phrase
+    :param training_data: list of (seq1, seq2) pairs
+    :return: list of (seq1, [seq*]) pairs
+    """
+    groups = collections.defaultdict(list)
+    for p1, p2 in training_data:
+        l = groups[tuple(p1)]
+        l.append(p2)
+    return list(groups.items())

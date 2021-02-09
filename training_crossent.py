@@ -17,13 +17,13 @@ import torch.optim as optim
 import torch.nn.functional as F
 
 import mlflow
-
+from tqdm import tqdm
 
 SAVES_DIR = "saves"
 
 BATCH_SIZE = 32
 LEARNING_RATE = 1e-3
-MAX_EPOCHES = 100
+MAX_EPOCHES = 50
 
 log = logging.getLogger("train")
 
@@ -117,11 +117,11 @@ if __name__ == "__main__":
     optimiser = optim.Adam(net.parameters(), lr=LEARNING_RATE)
     best_bleu = None
     with mlflow.start_run():
-        for epoch in range(MAX_EPOCHES):
+        for epoch in tqdm(range(MAX_EPOCHES)):
             losses = []
             bleu_sum = 0.0
             bleu_count = 0
-            for batch in dialogues.iterate_batches(train_data, BATCH_SIZE):
+            for batch in tqdm(dialogues.iterate_batches(train_data, BATCH_SIZE)):
                 optimiser.zero_grad()
                 input_seq, out_seq_list, _, out_idx = model.pack_batch(
                     batch, net.emb, device
